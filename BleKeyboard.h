@@ -1,6 +1,3 @@
-// uncomment the following line to use NimBLE library
-//#define USE_NIMBLE
-
 #ifndef ESP32_BLE_KEYBOARD_H
 #define ESP32_BLE_KEYBOARD_H
 #include "sdkconfig.h"
@@ -27,6 +24,7 @@
 #endif // USE_NIMBLE
 
 #include "Print.h"
+#define byte uint8_t
 
 #define BLE_KEYBOARD_VERSION "0.0.4"
 #define BLE_KEYBOARD_VERSION_MAJOR 0
@@ -144,11 +142,13 @@ private:
   bool               connected = false;
   uint32_t           _delay_ms = 7;
   void delay_ms(uint64_t ms);
-
+  
   uint16_t vid       = 0x05ac;
   uint16_t pid       = 0x820a;
   uint16_t version   = 0x0210;
 
+  uint32_t passkey;
+  bool enable_passkey;
 public:
   BleKeyboard(std::string deviceName = "ESP32 Keyboard", std::string deviceManufacturer = "Espressif", uint8_t batteryLevel = 100);
   void begin(void);
@@ -156,21 +156,30 @@ public:
   void sendReport(KeyReport* keys);
   void sendReport(MediaKeyReport* keys);
   size_t press(uint8_t k);
+  size_t press_iso(uint8_t k);
   size_t press(const MediaKeyReport k);
   size_t release(uint8_t k);
+  size_t release_iso(uint8_t k);
   size_t release(const MediaKeyReport k);
   size_t write(uint8_t c);
+  size_t write_iso(uint8_t c);
   size_t write(const MediaKeyReport c);
   size_t write(const uint8_t *buffer, size_t size);
+  size_t write_iso(const uint8_t *buffer, size_t size);
   void releaseAll(void);
   bool isConnected(void);
   void setBatteryLevel(uint8_t level);
   void setName(std::string deviceName);  
+  void setPasskey(uint32_t passkey);
   void setDelay(uint32_t ms);
-
+  
   void set_vendor_id(uint16_t vid);
   void set_product_id(uint16_t pid);
   void set_version(uint16_t version);
+  
+  byte utf8ascii(byte ascii);
+  String utf8ascii(String s);
+  void utf8ascii(char* s);
 protected:
   virtual void onStarted(BLEServer *pServer) { };
   virtual void onConnect(BLEServer* pServer) override;
